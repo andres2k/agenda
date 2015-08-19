@@ -5,7 +5,7 @@ agenda = [{"apellido": "Perez", "nombre": "Juan", "telefono": "341-156280014", "
 def menu():
     while True:
         print ("Agenda de contactos")
-        print ("===================")
+        print ("~~~~~~~~~~~~~~~~~~~")
         print ("")
         print ("1) - Listar contacto")
         print ("2) - Nuevo contacto")
