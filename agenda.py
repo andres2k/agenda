@@ -1,6 +1,66 @@
 __author__ = 'mauro'
 agenda = [{"apellido": "Perez", "nombre": "Juan", "telefono": "341-156280014", "correo": "mm@hotmail.com"}]
 
+class Contacto(object):
+    def __init__(self, apellido="", nombre="", telefono="", correo=""):   #al poner = algo, si no viene el parametro toma ese valor por defecto
+        self.apellido=apellido
+        self.nombre=nombre
+        self.telefono=telefono
+        self.correo=correo
+
+    def validar(self):
+        if not self.nombre or "".__eq__(self.nombre):
+            return False, "El nombre no puede estar vacio"
+        if not self.apellido or "".__eq__(self.apellido):
+            return False, "El apellido no puede estar vacio"
+        if not self.telefono or "".__eq__(self.telefono):              #ver de meter expresion regular
+            return False, "El telefono no puede estar vacio"
+        if not self.correo or self.correo=="":                      #ver de meter expresion regular
+            return False, "El correo no puede estar vacio"
+
+    def to_txt(self):
+        return ",".join((self.nombre, self.apellido, self.telefono, self.correo))
+
+    def __str__(self):
+        return ("Apellido: %s \n"
+                "Nombre: %s \n"
+                "Telefono: %s \n"
+                "Correo: %s \n") % (self.apellido,
+                                    self.nombre,
+                                    self.telefono,
+                                    self.correo)
+
+class Repositorio(object):
+    def __init__(self, filename="agenda.db"):
+        self.filename=filename
+        self.db=[]
+        self.__load()
+
+    def __load(self):
+        pass
+
+    def __store(self):
+        pass
+
+    def save(self, contacto):
+        self.db.append(contacto)
+
+    def find(self, campo, valor):
+        # otra forma seria:
+        # 2.- Esta es la recomendada
+        # return [x for x in self.db if getattr(x, campo).lower() == valor.lower()]
+        return filter(lambda x: getattr(x, campo)==valor, self.db)   #la function getattr(<objeto>, <atributo>) nos devuelve el valor del atributo en el objeto
+                                                                     # similar a objeto.atributo
+    def list(self):
+        return self.db
+
+    def delete(self, contacto):
+        self.db.remove(contacto)
+
+    def close(self):
+        self.__store(filename=self.filename)        #por que manda esto????
+
+
 
 def menu():
     while True:
