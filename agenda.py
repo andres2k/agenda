@@ -1,8 +1,9 @@
 __author__ = 'mauro'
 agenda = [{"apellido": "Perez", "nombre": "Juan", "telefono": "341-156280014", "correo": "mm@hotmail.com"}]
 
+
 class Contacto(object):
-    def __init__(self, apellido="", nombre="", telefono="", correo=""):   #al poner = algo, si no viene el parametro toma ese valor por defecto
+    def __init__(self, apellido="", nombre="", telefono="", correo=""):   # al poner = algo, si no viene el parametro toma ese valor por defecto
         self.apellido=apellido
         self.nombre=nombre
         self.telefono=telefono
@@ -13,9 +14,9 @@ class Contacto(object):
             return False, "El nombre no puede estar vacio"
         if not self.apellido or "".__eq__(self.apellido):
             return False, "El apellido no puede estar vacio"
-        if not self.telefono or "".__eq__(self.telefono):              #ver de meter expresion regular
+        if not self.telefono or "".__eq__(self.telefono):              # ver de meter expresion regular
             return False, "El telefono no puede estar vacio"
-        if not self.correo or self.correo=="":                      #ver de meter expresion regular
+        if not self.correo or self.correo=="":                      # ver de meter expresion regular
             return False, "El correo no puede estar vacio"
 
     def to_txt(self):
@@ -30,10 +31,11 @@ class Contacto(object):
                                     self.telefono,
                                     self.correo)
 
+
 class Repositorio(object):
     def __init__(self, filename="agenda.db"):
-        self.filename=filename
-        self.db=[]
+        self.filename = filename
+        self.db = []
         self.__load()
 
     def __load(self):
@@ -49,8 +51,9 @@ class Repositorio(object):
         # otra forma seria:
         # 2.- Esta es la recomendada
         # return [x for x in self.db if getattr(x, campo).lower() == valor.lower()]
-        return filter(lambda x: getattr(x, campo)==valor, self.db)   #la function getattr(<objeto>, <atributo>) nos devuelve el valor del atributo en el objeto
+        return filter(lambda x: getattr(x, campo)==valor, self.db)   # la function getattr(<objeto>, <atributo>) nos devuelve el valor del atributo en el objeto
                                                                      # similar a objeto.atributo
+
     def list(self):
         return self.db
 
@@ -58,93 +61,104 @@ class Repositorio(object):
         self.db.remove(contacto)
 
     def close(self):
-        self.__store(filename=self.filename)        #por que manda esto????
+        self.__store(filename=self.filename)        # por que manda esto????
 
 
+class Agenda(object):
+    def __init__(self):
+        self.db = Repositorio(filename="agenda.txt")    # porque aca es agenda.txt y el init de Repo por default
+                                                        # recibe agenda.db????
+    def __mostrar_lista(self, lista):
+        for item in lista:
+            print(str(item) + "\n")
 
-def menu():
-    while True:
-        print ("Agenda de contactos")
-        print ("===================")
-        print ("")
-        print ("1) - Listar contacto")
-        print ("2) - Nuevo contacto")
-        print ("3) - Actualizar contacto")
-        print ("4) - Eliminar contacto")
-        print ("0) - Salir")
-        print ("")
-        opcion = raw_input("Seleccione una opcion: ")
-        if opcion not in ("0", "1", "2", "3", "4"):
-            print ("La opcion ingresada es invalida")
-            continue
+    def __solicita_datos(self, contacto):
+        print ("Datos del contacto")
+        print ("~~~~~~~~~~~~~~~~~~")
+        contacto.apellido = raw_input("Apellido [%s]: " % contacto.apellido)    # para que sirve el [%s] dentro de un string???
+        contacto.nombre = raw_input("Nombre [%s]: " % contacto.nombre)          # creo que se usa asi para mostrar los datos del contacto
+        contacto.telefono = raw_input("Telefono [%s]: " % contacto.telefono)    # en el caso de la modificacion
+        contacto.correo = raw_input("Correo [%s]: " % contacto.correo)
+        return contacto
+
+    def __buscar(self):
+        campo = raw_input("Ingrese el criterio de busqueda [nombre|apellido|telefono|correo]:")
+        if campo in ("nombre", "apellido", "telefono", "correo"):
+            valor = raw_input("Ingrese el %s del contacto: " % campo)
+            contactos = self.db.find(campo, valor)
+            if not [].__eq__(contactos):
+                return contactos
+        return []
+
+    def menu(self):
+        while True:
+            print ("Agenda de contactos")
+            print ("~~~~~~~~~~~~~~~~~~~")
+            print ("")
+            print ("1) - Listar contacto")
+            print ("2) - Nuevo contacto")
+            print ("3) - Actualizar contacto")
+            print ("4) - Eliminar contacto")
+            print ("0) - Salir")
+            print ("")
+            opcion = raw_input("Seleccione una opcion: ")
+            if opcion not in ("0", "1", "2", "3", "4"):
+                print ("La opcion ingresada es invalida")
+                continue
+            else:
+                return int(opcion)
+
+    def inicio(self):
+        while True:
+            {1: self.listar,
+             2: self.nuevo,
+             3: self.modificar,
+             4: self.eliminar,
+             5: self.buscar,
+             0: self.salir}.get(self.menu()     # nos devuelve un numero del 0 al 5
+                                )()             #el diccionario, segun el numero nos da un nombre de funcion, luego con el () lo invocamos.
+
+    def listar(self):
+        pass
+
+    def buscar(self):
+        pass
+
+    def nuevo(self, contacto=None):
+        _contacto = self.__solicita_datos(contacto or Contacto())       # esto verifica q si es none genera uno???
+        res, msj = _contacto.validar()
+        if not res:
+            print msj
         else:
-            return int(opcion)
+            self.db.save(_contacto)                                     # por que usa _contacto? Es local?
 
+    def modificar(self):
+        contactos = self.__buscar()
+        if len(contactos) != 1:
+            raw_input("Se han encontrado uno o mas contactos"           # por que entrada???
+                      "para el criterio de busqueda especificado")
+        else:
+            contacto = contactos[0]
+            self.db.delete(contacto)
+            self.nuevo(contacto=contacto)                               # para "modificar", se crea un nuevo, que en realidad es el mismo pero
+                                                                        # pudiendo modificar los valores.
 
-# codificar para que muestre el menu y ejecute la funcion que corresponda
-def inicio():
-    while True:
-        opcion = menu()
-        if opcion == 0:
-            break
-        elif opcion == 1:
-            listar_contactos()
-        elif opcion == 2:
-            nuevo_contacto()
-        elif opcion == 3:
-            modificar_contacto()
-        elif opcion == 4:
-            eliminar_contacto()
+    def eliminar(self):
+        contactos = self.__buscar()
+        if len(contactos) > 0:
+            for contacto in contactos:
+                self.db.delete(contacto)
+            raw_input("Se eliminaron %d contactos." % len(contactos))
+        else:
+            raw_input("No se encontraron contactos para el criterio de busqueda especificado")
 
-
-def mostrar_contacto(contacto):
-    print("Apellido: " + contacto["apellido"])
-    print("Nombre: " + contacto["nombre"])
-    print("Telefono: " + contacto["telefono"])
-    print("Correo: " + contacto["correo"])
-    print("-" * 40)  # imprime 40 guiones medios
-
-
-# solicita los datos de contacto, y devuelve un diccionario con los mismos
-def solicita_datos_contacto():
-    nvo_contacto = {}
-    nvo_contacto["apellido"] = raw_input("Ingrese el apellido:")
-    nvo_contacto["nombre"] = raw_input("Ingrese el nombre:")
-    nvo_contacto["telefono"] = raw_input("Ingrese el telefono:")
-    nvo_contacto["correo"] = raw_input("Ingrese el correo:")
-    return nvo_contacto
-
-
-def nuevo_contacto():
-    nuevo = solicita_datos_contacto()
-    agenda.append(nuevo)
-    raw_input("Presiones enter para volver al menu...")
-
-
-def modificar_contacto():
-    contacto_nro = int(raw_input("Ingrese el numero de contacto a modificar: "))
-    if contacto_nro in range(0, len(agenda)):
-        agenda[contacto_nro]=solicita_datos_contacto()
-        print ("Modificado con exito!")
-    else:
-        print ("El contacto especificado no existe!")
-
-
-# lista los contactos de la agenda, mostrando su id (posicion dentro de la lista) y datos
-def listar_contactos():
-    for contacto_nro in range(0, len(agenda)):
-        print "ID: ", str(contacto_nro)
-        mostrar_contacto(agenda[contacto_nro])
-
-
-# elimina un contacto de la agenda basandose en la posicion que ocupa dentro de la agenda
-def eliminar_contacto():
-    contacto_nro = int(raw_input("Ingrese el numero de contacto a eliminar: "))
-    if contacto_nro in range(0, len(agenda)):
-        agenda.remove(agenda[contacto_nro])
-
-
+    def salir(self):
+        self.db.close()
+        print ("Saliendo...")
+        exit()
 
 if __name__ == "__main__":
-    inicio()    # invocamos a la rutina de inicio del programa
+    agenda = Agenda()
+    agenda.inicio()
+
 
