@@ -39,10 +39,25 @@ class Repositorio(object):
         self.__load()
 
     def __load(self):
-        pass
+        try:
+            archivo = open(self.filename, "r")
+        except:
+            print("No se pudo abrir el archivo")
+        else:
+            for linea in archivo.readlines():
+                linea = linea.rstrip("\n").split(",")
+                self.db.append(Contacto(linea[0], linea[1], linea[2], linea[3]))    # No es tan pythonico
+            archivo.close()
 
     def __store(self):
-        pass
+        try:
+            archivo = open(self.filename, "w")
+        except:
+            print ("No se pudo abrir el archivo")
+        else:
+            for contacto in self.db:
+                archivo.writelines(contacto.to_txt()+"\n")
+            archivo.close()
 
     def save(self, contacto):
         self.db.append(contacto)
@@ -61,13 +76,15 @@ class Repositorio(object):
         self.db.remove(contacto)
 
     def close(self):
-        self.__store(filename=self.filename)        # por que manda esto????
+       # self.__store(filename=self.filename)        # por que manda esto????
+        self.__store()
 
 
 class Agenda(object):
     def __init__(self):
         self.db = Repositorio(filename="agenda.txt")    # porque aca es agenda.txt y el init de Repo por default
                                                         # recibe agenda.db????
+
     def __mostrar_lista(self, lista):
         for item in lista:
             print(str(item) + "\n")
@@ -99,10 +116,11 @@ class Agenda(object):
             print ("2) - Nuevo contacto")
             print ("3) - Actualizar contacto")
             print ("4) - Eliminar contacto")
+            print ("5) - Buscar contacto")
             print ("0) - Salir")
             print ("")
             opcion = raw_input("Seleccione una opcion: ")
-            if opcion not in ("0", "1", "2", "3", "4"):
+            if opcion not in ("0", "1", "2", "3", "4", "5"):
                 print ("La opcion ingresada es invalida")
                 continue
             else:
@@ -119,10 +137,14 @@ class Agenda(object):
                                 )()             #el diccionario, segun el numero nos da un nombre de funcion, luego con el () lo invocamos.
 
     def listar(self):
-        pass
+        self.__mostrar_lista(self.db.list())
 
     def buscar(self):
-        pass
+        contactos = self.__buscar()
+        if len(contactos) == 0:
+            print ("No se encontraron contactos con ese criterio de busqueda")
+        else:
+            self.__mostrar_lista(contactos)
 
     def nuevo(self, contacto=None):
         _contacto = self.__solicita_datos(contacto or Contacto())       # esto verifica q si es none genera uno???

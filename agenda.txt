@@ -1,3 +1,2 @@
-matador,moreira,11111111,matador.moreira@equality.coop
 juan,perez,11111111,juan.perez@gmail.com
 pepito,perez,11111111,pepito.perez@equality.coop
